@@ -77,8 +77,8 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "hidden-bottles",
-      "repo": "admin-desktop",
+      "owner": "lenaertsjeroen-afk",
+      "repo": "hidden-bottles-admin-desktop",
       "releaseType": "release"
     }
   }
