@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hidden Bottles Admin Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #C9A050;
+      --primary-dark: #B8860B;
+      --bg-light: #FAFAFA;
+      --bg-card: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #666666;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg-light);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Top bar */
+    .top-bar {
+      height: 48px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      -webkit-app-region: drag;
+    }
+    
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      -webkit-app-region: no-drag;
+    }
+    
+    .logo-container {
+      position: relative;
+      width: 32px;
+      height: 32px;
+    }
+    
+    .bottle-icon {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      color: var(--primary);
+    }
+    
+    .bottle-icon.hidden-bottle {
+      color: rgba(201, 160, 80, 0.5);
+      animation: slideOut 2s ease-in-out infinite;
+    }
+    
+    @keyframes slideOut {
+      0%, 100% {
+        opacity: 0;
+        transform: translateX(0) scale(0.9);
+      }
+      50% {
+        opacity: 1;
+        transform: translateX(8px) scale(1);
+      }
+    }
+    
+    .brand-name {
+      font-family: 'Times New Roman', Georgia, serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text);
+    }
+    
+    .brand-name .highlight {
+      color: var(--primary);
+    }
+    
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      -webkit-app-region: no-drag;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      background: var(--bg-light);
+      border-radius: 8px;
+    }
+    
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: #fff;
+    }
+    
+    .user-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    
+    .user-role {
+      font-size: 10px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .top-bar-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    
+    .top-bar-btn:hover {
+      background: var(--bg-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .top-bar-btn.danger:hover {
+      background: #fef2f2;
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+    
+    .top-bar-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* Main content - iframe container */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .content-frame {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: var(--bg-light);
+    }
+    
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.3s;
+    }
+    
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loading-logo {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 24px;
+    }
+    
+    .loading-logo .bottle-icon {
+      width: 64px;
+      height: 64px;
+    }
+    
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+    
+    .loading-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Update banner */
+    .update-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      z-index: 100;
+      max-width: 320px;
+    }
+    
+    .update-banner.show {
+      display: flex;
+    }
+    
+    .update-banner .progress {
+      width: 80px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .update-banner .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    
+    .update-banner-btn {
+      padding: 4px 10px;
+      background: var(--primary);
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    
+    .update-banner-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    /* Error state */
+    .error-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    
+    .error-container.show {
+      display: flex;
+    }
+    
+    .error-icon {
+      width: 64px;
+      height: 64px;
+      color: #dc2626;
+      margin-bottom: 16px;
+    }
+    
+    .error-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    .error-message {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    
+    .error-btn {
+      padding: 10px 24px;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .error-btn:hover {
+      background: var(--primary-dark);
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-logo">
+      <svg class="bottle-icon hidden-bottle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
+        <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
+        <path d="M10 2h4" />
+        <line x1="12" y1="16" x2="12" y2="18" />
+      </svg>
+      <svg class="bottle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
+        <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
+        <path d="M10 2h4" />
+        <line x1="12" y1="16" x2="12" y2="18" />
+      </svg>
+    </div>
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading admin dashboard...</div>
+  </div>
+
+  <!-- Top bar -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <div class="logo-container">
+        <svg class="bottle-icon hidden-bottle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
+          <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
+          <path d="M10 2h4" />
+          <line x1="12" y1="16" x2="12" y2="18" />
+        </svg>
+        <svg class="bottle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
+          <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
+          <path d="M10 2h4" />
+          <line x1="12" y1="16" x2="12" y2="18" />
+        </svg>
+      </div>
+      <div class="brand-name">Hidden <span class="highlight">Bottles</span></div>
+    </div>
+    
+    <div class="top-bar-right">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div>
+          <div class="user-name" id="user-name">Admin</div>
+          <div class="user-role" id="user-role">Administrator</div>
+        </div>
+      </div>
+      
+      <button class="top-bar-btn" id="refresh-btn" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+        Refresh
+      </button>
+      
+      <button class="top-bar-btn" id="update-btn" title="Check for updates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Updates
+      </button>
+      
+      <button class="top-bar-btn danger" id="logout-btn" title="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <iframe 
+      id="admin-frame"
+      class="content-frame"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+    ></iframe>
+    
+    <!-- Error state -->
+    <div id="error-container" class="error-container">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      <h2 class="error-title">Unable to load dashboard</h2>
+      <p class="error-message" id="error-message">Please check your internet connection and try again.</p>
+      <button class="error-btn" id="retry-btn">Try Again</button>
+    </div>
+  </main>
+
+  <!-- Update notification banner -->
+  <div id="update-banner" class="update-banner">
+    <span id="update-text">Checking for updates...</span>
+    <div class="progress" id="progress-container" style="display: none;">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <button class="update-banner-btn" id="update-action-btn" style="display: none;">Install</button>
+  </div>
+
+  <script>
+    let API_URL = '';
+    let WEB_URL = '';
+    let userData = null;
+    
+    // Initialize
+    async function init() {
+      API_URL = await window.electronAPI.getApiUrl();
+      WEB_URL = await window.electronAPI.getWebUrl();
+      userData = await window.electronAPI.getUserData();
+      
+      if (!userData || !userData.token) {
+        window.electronAPI.logout();
+        return;
+      }
+      
+      // Update user info in top bar
+      const user = userData.user;
+      const displayName = user.first_name || user.name || 'Admin';
+      document.getElementById('user-name').textContent = displayName;
+      document.getElementById('user-avatar').textContent = displayName[0].toUpperCase();
+      document.getElementById('user-role').textContent = user.is_super_admin ? 'Super Admin' : 'Administrator';
+      
+      // Load the admin panel
+      loadAdminPanel();
+      
+      // Setup event handlers
+      setupEventHandlers();
+    }
+    
+    function loadAdminPanel() {
+      const iframe = document.getElementById('admin-frame');
+      const errorContainer = document.getElementById('error-container');
+      const loadingOverlay = document.getElementById('loading-overlay');
+      
+      // Construct the admin URL with embedded flag and token
+      const adminUrl = `${WEB_URL}/admin?embedded=true&desktop=true`;
+      
+      // Set up load handler
+      iframe.onload = function() {
+        // Try to inject the token into the iframe
+        try {
+          iframe.contentWindow.postMessage({
+            type: 'DESKTOP_AUTH',
+            token: userData.token,
+            user: userData.user
+          }, WEB_URL);
+        } catch (e) {
+          console.log('Could not inject token via postMessage:', e);
+        }
+        
+        // Hide loading overlay
+        loadingOverlay.classList.add('hidden');
+        errorContainer.classList.remove('show');
+      };
+      
+      iframe.onerror = function() {
+        loadingOverlay.classList.add('hidden');
+        errorContainer.classList.add('show');
+      };
+      
+      // Add timeout for slow connections
+      const loadTimeout = setTimeout(() => {
+        if (!loadingOverlay.classList.contains('hidden')) {
+          // Still loading after 30s - might be an issue
+          console.log('Load timeout - page taking too long');
+        }
+      }, 30000);
+      
+      // Load the URL
+      iframe.src = adminUrl;
+    }
+    
+    function setupEventHandlers() {
+      // Refresh button
+      document.getElementById('refresh-btn').addEventListener('click', () => {
+        const iframe = document.getElementById('admin-frame');
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        iframe.src = iframe.src;
+      });
+      
+      // Logout button
+      document.getElementById('logout-btn').addEventListener('click', async () => {
+        await window.electronAPI.logout();
+      });
+      
+      // Retry button
+      document.getElementById('retry-btn').addEventListener('click', () => {
+        document.getElementById('error-container').classList.remove('show');
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        loadAdminPanel();
+      });
+      
+      // Check for updates button
+      document.getElementById('update-btn').addEventListener('click', async () => {
+        await window.electronAPI.checkForUpdates();
+      });
+      
+      // Update action button (install)
+      document.getElementById('update-action-btn').addEventListener('click', async () => {
+        await window.electronAPI.installUpdate();
+      });
+    }
+    
+    // Listen for update status
+    window.electronAPI.onUpdateStatus((data) => {
+      const banner = document.getElementById('update-banner');
+      const text = document.getElementById('update-text');
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const actionBtn = document.getElementById('update-action-btn');
+      
+      switch (data.status) {
+        case 'checking':
+          banner.classList.add('show');
+          text.textContent = 'Checking for updates...';
+          progressContainer.style.display = 'none';
+          actionBtn.style.display = 'none';
+          break;
+        case 'available':
+          banner.classList.add('show');
+          text.textContent = `Update v${data.info.version} available`;
+          actionBtn.style.display = 'none';
+          break;
+        case 'downloading':
+          banner.classList.add('show');
+          text.textContent = 'Downloading...';
+          progressContainer.style.display = 'block';
+          progressBar.style.width = `${Math.round(data.progress)}%`;
+          actionBtn.style.display = 'none';
+          break;
+        case 'downloaded':
+          banner.classList.add('show');
+          text.textContent = 'Update ready!';
+          progressContainer.style.display = 'none';
+          actionBtn.style.display = 'block';
+          actionBtn.textContent = 'Restart & Install';
+          break;
+        case 'not-available':
+          banner.classList.add('show');
+          text.textContent = 'App is up to date';
+          progressContainer.style.display = 'none';
+          actionBtn.style.display = 'none';
+          setTimeout(() => banner.classList.remove('show'), 3000);
+          break;
+        case 'error':
+          banner.classList.add('show');
+          text.textContent = 'Update check failed';
+          progressContainer.style.display = 'none';
+          actionBtn.style.display = 'none';
+          setTimeout(() => banner.classList.remove('show'), 3000);
+          break;
+      }
+    });
+    
+    // Listen for messages from iframe (for logout, navigation etc)
+    window.addEventListener('message', (event) => {
+      // Only accept messages from our web app
+      if (event.origin !== WEB_URL.replace(/\/$/, '')) return;
+      
+      const { type, data } = event.data || {};
+      
+      switch (type) {
+        case 'LOGOUT':
+          window.electronAPI.logout();
+          break;
+        case 'NAVIGATE':
+          // Handle navigation requests if needed
+          break;
+      }
+    });
+    
+    // Initialize app
+    init();
+  </script>
+</body>
+</html>

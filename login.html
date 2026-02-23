@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hidden Bottles Admin - Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #FAFAFA;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a1a;
+    }
+    
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+    }
+    
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .logo-container {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 16px;
+    }
+    
+    .bottle-icon {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      color: #C9A050;
+    }
+    
+    .bottle-icon.hidden-bottle {
+      color: rgba(201, 160, 80, 0.5);
+      animation: slideOut 2s ease-in-out infinite;
+    }
+    
+    @keyframes slideOut {
+      0%, 100% {
+        opacity: 0;
+        transform: translateX(0) scale(0.9);
+      }
+      50% {
+        opacity: 1;
+        transform: translateX(14px) scale(1);
+      }
+    }
+    
+    .brand-name {
+      font-family: 'Times New Roman', Georgia, serif;
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    
+    .brand-name .highlight {
+      color: #C9A050;
+    }
+    
+    .brand-subtitle {
+      font-size: 14px;
+      color: #666;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    
+    .login-card {
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    }
+    
+    .login-title {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      text-align: center;
+      color: #1a1a1a;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #f5f5f5;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      font-size: 15px;
+      color: #1a1a1a;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #C9A050;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(201, 160, 80, 0.1);
+    }
+    
+    .form-input::placeholder {
+      color: #999;
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #C9A050 0%, #B8860B 100%);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201, 160, 80, 0.3);
+    }
+    
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+    
+    .version-info {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201, 160, 80, 0.1);
+      border: 1px solid rgba(201, 160, 80, 0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #B8860B;
+      margin-top: 16px;
+    }
+    
+    .admin-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .loading-spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    .login-btn.loading .loading-spinner {
+      display: inline-block;
+    }
+    
+    .login-btn.loading .btn-text {
+      display: none;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Update notification banner */
+    .update-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 12px 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      z-index: 100;
+    }
+    
+    .update-banner.show {
+      display: flex;
+    }
+    
+    .update-banner .progress {
+      width: 100px;
+      height: 4px;
+      background: #e5e5e5;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .update-banner .progress-bar {
+      height: 100%;
+      background: #C9A050;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo-section">
+      <div class="logo-container">
+        <svg class="bottle-icon hidden-bottle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
+          <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
+          <path d="M10 2h4" />
+          <line x1="12" y1="16" x2="12" y2="18" />
+        </svg>
+        <svg class="bottle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
+          <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
+          <path d="M10 2h4" />
+          <line x1="12" y1="16" x2="12" y2="18" />
+        </svg>
+      </div>
+      <div class="brand-name">Hidden <span class="highlight">Bottles</span></div>
+      <div class="brand-subtitle">Admin Dashboard</div>
+      <div class="admin-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Desktop Application
+      </div>
+    </div>
+    
+    <div class="login-card">
+      <h2 class="login-title">Admin Login</h2>
+      
+      <div id="error-message" class="error-message"></div>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-input" 
+            placeholder="admin@hiddenbottles.com"
+            required
+            autocomplete="email"
+            data-testid="login-email"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-input" 
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+            data-testid="login-password"
+          >
+        </div>
+        
+        <button type="submit" id="login-btn" class="login-btn" data-testid="login-submit">
+          <span class="loading-spinner"></span>
+          <span class="btn-text">Sign In</span>
+        </button>
+      </form>
+    </div>
+    
+    <div class="version-info">
+      Hidden Bottles Admin v<span id="version">1.0.0</span>
+    </div>
+  </div>
+
+  <!-- Update notification banner -->
+  <div id="update-banner" class="update-banner">
+    <span id="update-text">Checking for updates...</span>
+    <div class="progress" id="progress-container" style="display: none;">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <script>
+    let API_URL = '';
+    
+    // Initialize
+    async function init() {
+      API_URL = await window.electronAPI.getApiUrl();
+      const version = await window.electronAPI.getAppVersion();
+      document.getElementById('version').textContent = version;
+      
+      // Check if already logged in
+      const userData = await window.electronAPI.getUserData();
+      if (userData && userData.token) {
+        // Verify token is still valid
+        try {
+          const response = await fetch(`${API_URL}/admin/me`, {
+            headers: { 'Authorization': `Bearer ${userData.token}` }
+          });
+          if (response.ok) {
+            window.electronAPI.loginSuccess(userData);
+            return;
+          }
+        } catch (e) {
+          // Token invalid, show login
+        }
+      }
+    }
+    
+    init();
+    
+    // Listen for update status
+    window.electronAPI.onUpdateStatus((data) => {
+      const banner = document.getElementById('update-banner');
+      const text = document.getElementById('update-text');
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      
+      switch (data.status) {
+        case 'checking':
+          banner.classList.add('show');
+          text.textContent = 'Checking for updates...';
+          progressContainer.style.display = 'none';
+          break;
+        case 'available':
+          banner.classList.add('show');
+          text.textContent = `Update available: v${data.info.version}`;
+          break;
+        case 'downloading':
+          banner.classList.add('show');
+          text.textContent = 'Downloading update...';
+          progressContainer.style.display = 'block';
+          progressBar.style.width = `${data.progress}%`;
+          break;
+        case 'downloaded':
+          banner.classList.add('show');
+          text.textContent = 'Update ready to install!';
+          progressContainer.style.display = 'none';
+          break;
+        case 'not-available':
+          setTimeout(() => banner.classList.remove('show'), 2000);
+          text.textContent = 'App is up to date';
+          break;
+        case 'error':
+          setTimeout(() => banner.classList.remove('show'), 3000);
+          text.textContent = 'Update check failed';
+          break;
+      }
+    });
+    
+    // Handle login form submission
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('login-btn');
+      const errorDiv = document.getElementById('error-message');
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtn.classList.add('loading');
+      errorDiv.classList.remove('show');
+      
+      try {
+        // Login request
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.detail || 'Login failed');
+        }
+        
+        // Check if user is admin
+        if (!data.user.is_admin) {
+          throw new Error('Access denied. Admin privileges required.');
+        }
+        
+        // Store token and user data
+        const userData = {
+          token: data.access_token,
+          user: data.user
+        };
+        
+        await window.electronAPI.storeSet('token', data.access_token);
+        await window.electronAPI.loginSuccess(userData);
+        
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.add('show');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>
