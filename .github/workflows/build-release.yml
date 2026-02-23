@@ -5,11 +5,6 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., 1.0.1)'
-        required: true
-        default: '1.0.0'
 
 jobs:
   build:
@@ -33,15 +28,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --frozen-lockfile
+        run: npm install
 
       - name: Build for ${{ matrix.platform }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn build:${{ matrix.platform }}
+        run: npm run build:${{ matrix.platform }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
