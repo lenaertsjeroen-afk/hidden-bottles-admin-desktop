@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -28,6 +29,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+                - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y rpm
 
       - name: Install dependencies
         run: npm install
@@ -52,7 +57,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: always()
 
     steps:
       - name: Download all artifacts
@@ -69,3 +74,12 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+Click Commit changes.
+
+Then re-run:
+Go to Actions tab
+Click the failed workflow
+Click "Re-run all jobs"
+Feb 23, 10:36 PM
+
+Copy
