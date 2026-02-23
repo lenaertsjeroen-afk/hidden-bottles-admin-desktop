@@ -12,7 +12,10 @@
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
   },
-  "author": "Hidden Bottles",
+  "author": {
+    "name": "Hidden Bottles",
+    "email": "info@hiddenbottles.com"
+  },
   "license": "PROPRIETARY",
   "devDependencies": {
     "electron": "^28.0.0",
