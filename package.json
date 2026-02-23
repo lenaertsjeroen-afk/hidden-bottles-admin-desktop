@@ -46,15 +46,15 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "assets/icon.png",
+      "icon": "assets/icon.ico",
       "artifactName": "${productName}-${version}-Setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "assets/icon.png",
-      "uninstallerIcon": "assets/icon.png",
-      "installerHeaderIcon": "assets/icon.png",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Hidden Bottles Admin"
@@ -64,12 +64,12 @@
     },
     "mac": {
       "target": ["dmg", "zip"],
-      "icon": "assets/icon.png",
+      "icon": "assets/icon.ico",
       "category": "public.app-category.business"
     },
     "linux": {
       "target": ["AppImage", "deb"],
-      "icon": "assets/icon.png",
+      "icon": "assets/icon.ico",
       "category": "Office"
     },
     "publish": {
