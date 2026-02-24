@@ -67,7 +67,7 @@
     },
     "mac": {
       "target": ["dmg", "zip"],
-      "icon": "assets/icon.ico",
+      "icon": "assets/icon.png",
       "category": "public.app-category.business"
     },
     "linux": {
