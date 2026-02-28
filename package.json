@@ -1,6 +1,6 @@
 {
   "name": "hidden-bottles-admin",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Hidden Bottles Admin Dashboard - Desktop Application with One-Time Activation",
   "main": "main.js",
   "scripts": {

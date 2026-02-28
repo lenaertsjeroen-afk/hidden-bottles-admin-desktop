@@ -626,16 +626,21 @@
         showSuccess('Device activated successfully!');
         
         if (isElectron) {
-          // Store the device token for future use
+          // Store the device token for future auto-login
           await window.electronAPI.storeSet('deviceToken', data.device_token);
+          
+          // Store initial user data
           await window.electronAPI.storeSet('userData', {
-            token: data.access_token || '',
-            user: data.admin
+            token: data.access_token,
+            user: data.user
           });
           
-          // Small delay to show success message
-          setTimeout(async () => {
-            // Generate a session token
+          showSuccess('Device activated! Loading admin panel...');
+          
+          // Wait a moment then verify and load admin
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          try {
             const verifyResponse = await fetch(`${API_URL}/auth/desktop/verify`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -644,12 +649,26 @@
             
             if (verifyResponse.ok) {
               const sessionData = await verifyResponse.json();
+              // This will load the admin panel
               await window.electronAPI.loginSuccess({
                 token: sessionData.access_token,
                 user: sessionData.user
               });
+            } else {
+              // If verify fails, still try with activation data
+              await window.electronAPI.loginSuccess({
+                token: data.access_token,
+                user: data.user
+              });
             }
-          }, 1000);
+          } catch (verifyError) {
+            console.error('Verify error:', verifyError);
+            // Fallback: use activation data directly
+            await window.electronAPI.loginSuccess({
+              token: data.access_token,
+              user: data.user
+            });
+          }
         } else {
           // For web, redirect to admin
           setTimeout(() => {
