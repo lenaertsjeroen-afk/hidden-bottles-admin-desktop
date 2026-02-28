@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hidden Bottles Admin - Login</title>
+  <title>Hidden Bottles Admin - Activate</title>
   <style>
     * {
       margin: 0;
@@ -12,7 +12,7 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #FAFAFA;
       min-height: 100vh;
       display: flex;
@@ -23,7 +23,7 @@
     
     .login-container {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       padding: 40px;
     }
     
@@ -34,102 +34,97 @@
     
     .logo-container {
       position: relative;
-      width: 80px;
-      height: 80px;
+      width: 72px;
+      height: 72px;
       margin: 0 auto 16px;
     }
     
     .bottle-icon {
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 72px;
+      height: 72px;
       color: #C9A050;
-    }
-    
-    .bottle-icon.hidden-bottle {
-      color: rgba(201, 160, 80, 0.5);
-      animation: slideOut 2s ease-in-out infinite;
-    }
-    
-    @keyframes slideOut {
-      0%, 100% {
-        opacity: 0;
-        transform: translateX(0) scale(0.9);
-      }
-      50% {
-        opacity: 1;
-        transform: translateX(14px) scale(1);
-      }
     }
     
     .brand-name {
-      font-family: 'Times New Roman', Georgia, serif;
-      font-size: 28px;
-      font-weight: 400;
-      letter-spacing: 1px;
+      font-family: Georgia, serif;
+      font-size: 26px;
       color: #1a1a1a;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     
-    .brand-name .highlight {
-      color: #C9A050;
-    }
+    .brand-name .highlight { color: #C9A050; }
     
     .brand-subtitle {
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       text-transform: uppercase;
     }
     
     .login-card {
-      background: #ffffff;
+      background: #fff;
       border: 1px solid #e5e5e5;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+      border-radius: 12px;
+      padding: 28px;
     }
     
     .login-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 500;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
       text-align: center;
-      color: #1a1a1a;
+    }
+    
+    .login-subtitle {
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 24px;
     }
     
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     
     .form-label {
       display: block;
       font-size: 13px;
       color: #666;
-      margin-bottom: 8px;
-      font-weight: 500;
+      margin-bottom: 6px;
     }
     
     .form-input {
       width: 100%;
-      padding: 14px 16px;
+      padding: 12px 14px;
       background: #f5f5f5;
       border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      font-size: 15px;
+      border-radius: 8px;
+      font-size: 14px;
       color: #1a1a1a;
-      transition: all 0.2s;
     }
     
     .form-input:focus {
       outline: none;
       border-color: #C9A050;
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(201, 160, 80, 0.1);
+      background: #fff;
     }
     
-    .form-input::placeholder {
-      color: #999;
+    /* Activation code input styling */
+    .activation-code-input {
+      font-family: 'Courier New', monospace;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 16px;
+    }
+    
+    .activation-code-input::placeholder {
+      font-size: 14px;
+      letter-spacing: 1px;
+      font-weight: normal;
     }
     
     .login-btn {
@@ -137,22 +132,18 @@
       padding: 14px;
       background: linear-gradient(135deg, #C9A050 0%, #B8860B 100%);
       border: none;
-      border-radius: 10px;
-      font-size: 15px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 600;
-      color: #ffffff;
+      color: #fff;
       cursor: pointer;
-      transition: all 0.2s;
       margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      transition: all 0.2s ease;
     }
     
     .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(201, 160, 80, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(201, 160, 80, 0.3);
     }
     
     .login-btn:disabled {
@@ -165,111 +156,213 @@
       background: #fef2f2;
       border: 1px solid #fecaca;
       color: #dc2626;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-bottom: 20px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
       display: none;
     }
     
-    .error-message.show {
-      display: block;
+    .error-message.show { display: block; }
+    
+    .success-message {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #16a34a;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
     }
+    
+    .success-message.show { display: block; }
     
     .version-info {
       text-align: center;
-      margin-top: 24px;
-      font-size: 12px;
+      margin-top: 20px;
+      font-size: 11px;
       color: #999;
     }
     
-    .admin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(201, 160, 80, 0.1);
-      border: 1px solid rgba(201, 160, 80, 0.3);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      color: #B8860B;
-      margin-top: 16px;
-    }
-    
-    .admin-badge svg {
-      width: 14px;
-      height: 14px;
-    }
-    
-    .loading-spinner {
-      display: none;
-      width: 18px;
-      height: 18px;
-      border: 2px solid transparent;
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    
-    .login-btn.loading .loading-spinner {
-      display: inline-block;
-    }
-    
-    .login-btn.loading .btn-text {
-      display: none;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    /* Update notification banner */
-    .update-banner {
+    /* Offline indicator */
+    .offline-banner {
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #ffffff;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
-      padding: 12px 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ef4444;
+      color: white;
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
       display: none;
       align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      z-index: 100;
+      justify-content: center;
+      gap: 8px;
     }
     
-    .update-banner.show {
+    .offline-banner.show {
       display: flex;
     }
     
-    .update-banner .progress {
-      width: 100px;
-      height: 4px;
-      background: #e5e5e5;
-      border-radius: 2px;
-      overflow: hidden;
+    .offline-banner svg {
+      width: 16px;
+      height: 16px;
     }
     
-    .update-banner .progress-bar {
-      height: 100%;
-      background: #C9A050;
-      transition: width 0.3s;
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    
+    .online-dot.offline {
+      background: #ef4444;
+    }
+    
+    .help-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e5e5;
+    }
+    
+    .help-title {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    
+    .help-steps {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.8;
+    }
+    
+    .help-steps li {
+      margin-bottom: 4px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: #f5f5f5;
+      padding: 4px;
+      border-radius: 8px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .tab:hover {
+      color: #1a1a1a;
+    }
+    
+    .tab.active {
+      background: #fff;
+      color: #C9A050;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: #999;
+      font-size: 12px;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e5e5;
+    }
+    
+    .divider span {
+      padding: 0 12px;
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .remember-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #C9A050;
+      cursor: pointer;
+    }
+    
+    .remember-label {
+      font-size: 13px;
+      color: #888;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .reset-btn {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: underline;
+      display: block;
+      margin: 16px auto 0;
+    }
+    
+    .reset-btn:hover {
+      color: #C9A050;
     }
   </style>
 </head>
 <body>
+  <!-- Offline Banner -->
+  <div id="offline-banner" class="offline-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+      <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+      <line x1="12" y1="20" x2="12.01" y2="20"></line>
+    </svg>
+    No internet connection
+  </div>
+
   <div class="login-container">
     <div class="logo-section">
       <div class="logo-container">
-        <svg class="bottle-icon hidden-bottle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
-          <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
-          <path d="M10 2h4" />
-          <line x1="12" y1="16" x2="12" y2="18" />
-        </svg>
         <svg class="bottle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
           <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
@@ -279,155 +372,348 @@
       </div>
       <div class="brand-name">Hidden <span class="highlight">Bottles</span></div>
       <div class="brand-subtitle">Admin Dashboard</div>
-      <div class="admin-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        Desktop Application
-      </div>
     </div>
     
     <div class="login-card">
-      <h2 class="login-title">Admin Login</h2>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="activation" id="tab-activation">Activation Code</button>
+        <button class="tab" data-tab="login" id="tab-login">Admin Login</button>
+      </div>
       
       <div id="error-message" class="error-message"></div>
+      <div id="success-message" class="success-message"></div>
       
-      <form id="login-form">
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input 
-            type="email" 
-            id="email" 
-            class="form-input" 
-            placeholder="admin@hiddenbottles.com"
-            required
-            autocomplete="email"
-            data-testid="login-email"
-          >
-        </div>
+      <!-- Activation Code Tab -->
+      <div id="content-activation" class="tab-content active">
+        <p class="login-subtitle">Enter the activation code from your admin dashboard</p>
         
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            class="form-input" 
-            placeholder="Enter your password"
-            required
-            autocomplete="current-password"
-            data-testid="login-password"
-          >
-        </div>
+        <form id="activation-form">
+          <div class="form-group">
+            <label class="form-label">Activation Code</label>
+            <input type="text" id="activation-code" class="form-input activation-code-input" 
+                   placeholder="XXXX-XXXX-XXXX" 
+                   maxlength="14"
+                   autocomplete="off"
+                   required>
+          </div>
+          
+          <button type="submit" id="activate-btn" class="login-btn">Activate This Device</button>
+        </form>
         
-        <button type="submit" id="login-btn" class="login-btn" data-testid="login-submit">
-          <span class="loading-spinner"></span>
-          <span class="btn-text">Sign In</span>
-        </button>
-      </form>
+        <div class="help-section">
+          <p class="help-title">How to get an activation code:</p>
+          <ol class="help-steps">
+            <li>Log in to the web admin dashboard</li>
+            <li>Go to Settings → Desktop App</li>
+            <li>Click "Generate Activation Code"</li>
+            <li>Enter the code above (valid for 24 hours)</li>
+          </ol>
+        </div>
+      </div>
+      
+      <!-- Login Tab (Fallback) -->
+      <div id="content-login" class="tab-content">
+        <p class="login-subtitle">Sign in with your admin credentials</p>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="email" class="form-input" placeholder="admin@hiddenbottles.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Enter password" required>
+          </div>
+          
+          <div class="remember-me">
+            <input type="checkbox" id="remember-me" class="remember-checkbox">
+            <label for="remember-me" class="remember-label">Remember me</label>
+          </div>
+          
+          <button type="submit" id="login-btn" class="login-btn">Sign In</button>
+        </form>
+      </div>
+      
+      <button type="button" id="reset-btn" class="reset-btn">Having trouble? Reset app data</button>
     </div>
     
     <div class="version-info">
+      <span class="online-dot" id="online-dot"></span>
       Hidden Bottles Admin v<span id="version">1.0.0</span>
     </div>
   </div>
 
-  <!-- Update notification banner -->
-  <div id="update-banner" class="update-banner">
-    <span id="update-text">Checking for updates...</span>
-    <div class="progress" id="progress-container" style="display: none;">
-      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
-    </div>
-  </div>
-
   <script>
-    let API_URL = '';
+    let API_URL = 'https://collectors-vault-1.preview.emergentagent.com/api';
+    let isOnline = true;
+    let isElectron = false;
     
-    // Initialize
     async function init() {
-      API_URL = await window.electronAPI.getApiUrl();
-      const version = await window.electronAPI.getAppVersion();
-      document.getElementById('version').textContent = version;
+      // Check if running in Electron
+      isElectron = window.electronAPI !== undefined;
       
-      // Check if already logged in
-      const userData = await window.electronAPI.getUserData();
-      if (userData && userData.token) {
-        // Verify token is still valid
+      if (isElectron) {
         try {
-          const response = await fetch(`${API_URL}/admin/me`, {
-            headers: { 'Authorization': `Bearer ${userData.token}` }
-          });
-          if (response.ok) {
-            window.electronAPI.loginSuccess(userData);
-            return;
+          API_URL = await window.electronAPI.getApiUrl();
+          if (!API_URL || !API_URL.startsWith('http')) {
+            API_URL = 'https://collectors-vault-1.preview.emergentagent.com/api';
           }
         } catch (e) {
-          // Token invalid, show login
+          console.error('Failed to get API URL:', e);
         }
+        
+        try {
+          document.getElementById('version').textContent = await window.electronAPI.getAppVersion();
+        } catch (e) {
+          document.getElementById('version').textContent = '1.0.0';
+        }
+        
+        // Check if already activated
+        checkExistingActivation();
+      } else {
+        document.getElementById('version').textContent = '1.0.0 (Web)';
       }
+      
+      // Check online status
+      updateOnlineStatus(navigator.onLine);
+      window.addEventListener('online', () => updateOnlineStatus(true));
+      window.addEventListener('offline', () => updateOnlineStatus(false));
+      
+      // Setup tabs
+      setupTabs();
+      
+      // Format activation code input
+      setupActivationCodeInput();
+    }
+    
+    async function checkExistingActivation() {
+      if (!isElectron) return;
+      
+      try {
+        const deviceToken = await window.electronAPI.storeGet('deviceToken');
+        if (deviceToken) {
+          // Verify the device token
+          document.getElementById('activate-btn').textContent = 'Verifying...';
+          document.getElementById('activate-btn').disabled = true;
+          
+          const response = await fetch(`${API_URL}/auth/desktop/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_token: deviceToken })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            // Device is still valid, proceed to admin panel
+            await window.electronAPI.storeSet('userData', {
+              token: data.access_token,
+              user: data.user
+            });
+            await window.electronAPI.loginSuccess({
+              token: data.access_token,
+              user: data.user
+            });
+            return;
+          } else {
+            // Token is invalid, clear it
+            await window.electronAPI.storeSet('deviceToken', null);
+          }
+        }
+      } catch (e) {
+        console.error('Activation check failed:', e);
+      }
+      
+      document.getElementById('activate-btn').textContent = 'Activate This Device';
+      document.getElementById('activate-btn').disabled = false;
+    }
+    
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.dataset.tab;
+          
+          // Update tab buttons
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Update content
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          document.getElementById(`content-${targetTab}`).classList.add('active');
+          
+          // Clear messages
+          document.getElementById('error-message').classList.remove('show');
+          document.getElementById('success-message').classList.remove('show');
+        });
+      });
+    }
+    
+    function setupActivationCodeInput() {
+      const input = document.getElementById('activation-code');
+      input.addEventListener('input', (e) => {
+        let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        
+        // Add dashes after every 4 characters
+        if (value.length > 4) {
+          value = value.slice(0, 4) + '-' + value.slice(4);
+        }
+        if (value.length > 9) {
+          value = value.slice(0, 9) + '-' + value.slice(9);
+        }
+        
+        e.target.value = value.slice(0, 14);
+      });
+    }
+    
+    function updateOnlineStatus(online) {
+      isOnline = online;
+      const banner = document.getElementById('offline-banner');
+      const dot = document.getElementById('online-dot');
+      const activateBtn = document.getElementById('activate-btn');
+      const loginBtn = document.getElementById('login-btn');
+      
+      if (online) {
+        banner.classList.remove('show');
+        dot.classList.remove('offline');
+        activateBtn.disabled = false;
+        loginBtn.disabled = false;
+      } else {
+        banner.classList.add('show');
+        dot.classList.add('offline');
+        activateBtn.disabled = true;
+        loginBtn.disabled = true;
+      }
+    }
+    
+    function showError(message) {
+      const errorDiv = document.getElementById('error-message');
+      const successDiv = document.getElementById('success-message');
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      successDiv.classList.remove('show');
+    }
+    
+    function showSuccess(message) {
+      const errorDiv = document.getElementById('error-message');
+      const successDiv = document.getElementById('success-message');
+      successDiv.textContent = message;
+      successDiv.classList.add('show');
+      errorDiv.classList.remove('show');
     }
     
     init();
     
-    // Listen for update status
-    window.electronAPI.onUpdateStatus((data) => {
-      const banner = document.getElementById('update-banner');
-      const text = document.getElementById('update-text');
-      const progressContainer = document.getElementById('progress-container');
-      const progressBar = document.getElementById('progress-bar');
+    // Activation form handler
+    document.getElementById('activation-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      switch (data.status) {
-        case 'checking':
-          banner.classList.add('show');
-          text.textContent = 'Checking for updates...';
-          progressContainer.style.display = 'none';
-          break;
-        case 'available':
-          banner.classList.add('show');
-          text.textContent = `Update available: v${data.info.version}`;
-          break;
-        case 'downloading':
-          banner.classList.add('show');
-          text.textContent = 'Downloading update...';
-          progressContainer.style.display = 'block';
-          progressBar.style.width = `${data.progress}%`;
-          break;
-        case 'downloaded':
-          banner.classList.add('show');
-          text.textContent = 'Update ready to install!';
-          progressContainer.style.display = 'none';
-          break;
-        case 'not-available':
-          setTimeout(() => banner.classList.remove('show'), 2000);
-          text.textContent = 'App is up to date';
-          break;
-        case 'error':
-          setTimeout(() => banner.classList.remove('show'), 3000);
-          text.textContent = 'Update check failed';
-          break;
+      if (!isOnline) {
+        showError('No internet connection');
+        return;
+      }
+      
+      const code = document.getElementById('activation-code').value;
+      const activateBtn = document.getElementById('activate-btn');
+      
+      if (code.replace(/-/g, '').length !== 12) {
+        showError('Please enter a valid 12-character activation code');
+        return;
+      }
+      
+      activateBtn.disabled = true;
+      activateBtn.textContent = 'Activating...';
+      
+      try {
+        const deviceInfo = {
+          activation_code: code,
+          device_name: isElectron ? await window.electronAPI.getDeviceName() : 'Web Browser',
+          device_platform: navigator.platform,
+          device_version: isElectron ? await window.electronAPI.getAppVersion() : 'Web'
+        };
+        
+        const response = await fetch(`${API_URL}/auth/desktop/activate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(deviceInfo)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.detail || 'Activation failed');
+        }
+        
+        showSuccess('Device activated successfully!');
+        
+        if (isElectron) {
+          // Store the device token for future use
+          await window.electronAPI.storeSet('deviceToken', data.device_token);
+          await window.electronAPI.storeSet('userData', {
+            token: data.access_token || '',
+            user: data.admin
+          });
+          
+          // Small delay to show success message
+          setTimeout(async () => {
+            // Generate a session token
+            const verifyResponse = await fetch(`${API_URL}/auth/desktop/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ device_token: data.device_token })
+            });
+            
+            if (verifyResponse.ok) {
+              const sessionData = await verifyResponse.json();
+              await window.electronAPI.loginSuccess({
+                token: sessionData.access_token,
+                user: sessionData.user
+              });
+            }
+          }, 1000);
+        } else {
+          // For web, redirect to admin
+          setTimeout(() => {
+            window.location.href = API_URL.replace('/api', '') + '/admin';
+          }, 1500);
+        }
+        
+      } catch (error) {
+        console.error('Activation error:', error);
+        showError(error.message || 'Activation failed. Please try again.');
+        activateBtn.disabled = false;
+        activateBtn.textContent = 'Activate This Device';
       }
     });
     
-    // Handle login form submission
+    // Login form handler (fallback)
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      if (!isOnline) {
+        showError('No internet connection');
+        return;
+      }
       
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const loginBtn = document.getElementById('login-btn');
-      const errorDiv = document.getElementById('error-message');
       
-      // Show loading state
       loginBtn.disabled = true;
-      loginBtn.classList.add('loading');
-      errorDiv.classList.remove('show');
+      loginBtn.textContent = 'Signing in...';
       
       try {
-        // Login request
         const response = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Server error. Please try again.');
+        }
         
         const data = await response.json();
         
@@ -435,26 +721,54 @@
           throw new Error(data.detail || 'Login failed');
         }
         
-        // Check if user is admin
-        if (!data.user.is_admin) {
-          throw new Error('Access denied. Admin privileges required.');
+        if (!data.user || !data.user.is_admin) {
+          throw new Error('Admin access required');
         }
         
-        // Store token and user data
-        const userData = {
-          token: data.access_token,
-          user: data.user
-        };
+        // Save credentials if remember me is checked
+        const rememberMe = document.getElementById('remember-me').checked;
+        if (rememberMe && isElectron) {
+          await window.electronAPI.storeSet('rememberedCredentials', { email });
+        }
         
-        await window.electronAPI.storeSet('token', data.access_token);
-        await window.electronAPI.loginSuccess(userData);
+        if (isElectron) {
+          await window.electronAPI.storeSet('userData', {
+            token: data.access_token,
+            user: data.user
+          });
+          await window.electronAPI.loginSuccess({
+            token: data.access_token,
+            user: data.user
+          });
+        } else {
+          window.location.href = API_URL.replace('/api', '') + '/admin';
+        }
         
       } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.classList.add('show');
-      } finally {
+        console.error('Login error:', error);
+        showError(error.message || 'Login failed');
         loginBtn.disabled = false;
-        loginBtn.classList.remove('loading');
+        loginBtn.textContent = 'Sign In';
+      }
+    });
+    
+    // Reset button handler
+    document.getElementById('reset-btn').addEventListener('click', async () => {
+      if (confirm('This will clear all app data including device activation. You will need a new activation code. Continue?')) {
+        if (isElectron) {
+          try {
+            await window.electronAPI.storeSet('userData', null);
+            await window.electronAPI.storeSet('token', null);
+            await window.electronAPI.storeSet('deviceToken', null);
+            await window.electronAPI.storeSet('rememberedCredentials', null);
+            window.location.reload();
+          } catch (e) {
+            alert('Failed to reset. Please reinstall the application.');
+          }
+        } else {
+          localStorage.clear();
+          window.location.reload();
+        }
       }
     });
   </script>

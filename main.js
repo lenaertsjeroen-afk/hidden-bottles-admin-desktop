@@ -1,6 +1,7 @@
 /**
  * Hidden Bottles Admin - Electron Main Process
- * Desktop application for admin dashboard with auto-update support
+ * Desktop application for admin dashboard - ADMIN ONLY, no website
+ * Version 2.0.0 - One-Time Activation Code Support
  */
 const { app, BrowserWindow, ipcMain, Menu, Tray, shell, nativeImage, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
@@ -11,50 +12,68 @@ const Store = require('electron-store');
 const store = new Store({
   name: 'hidden-bottles-admin',
   defaults: {
-    windowBounds: { width: 1400, height: 900 },
-    apiUrl: 'https://spirits-marketplace-2.preview.emergentagent.com/api'
+    windowBounds: { width: 1400, height: 900, x: undefined, y: undefined },
+    apiUrl: 'https://collectors-vault-1.preview.emergentagent.com/api'
   }
 });
 
 let mainWindow = null;
-let splashWindow = null;
 let tray = null;
 let isQuitting = false;
 
-// API URL - can be changed for different environments
-const API_URL = store.get('apiUrl');
+// API URL - validate and reset if corrupted
+let API_URL = store.get('apiUrl');
+if (!API_URL || !API_URL.startsWith('http')) {
+  API_URL = 'https://collectors-vault-1.preview.emergentagent.com/api';
+  store.set('apiUrl', API_URL);
+}
 const WEB_URL = API_URL.replace('/api', '');
 
 // Auto-updater configuration
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
-function createSplashWindow() {
-  splashWindow = new BrowserWindow({
-    width: 400,
-    height: 300,
-    frame: false,
-    transparent: false,
-    alwaysOnTop: true,
-    resizable: false,
-    center: true,
-    icon: path.join(__dirname, 'assets', 'icon.png'),
-    backgroundColor: '#FAFAFA',
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true
+async function verifyDeviceToken() {
+  const deviceToken = store.get('deviceToken');
+  if (!deviceToken) return null;
+  
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const response = await fetch(`${API_URL}/auth/desktop/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_token: deviceToken })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      // Store the session data
+      store.set('userData', {
+        token: data.access_token,
+        user: data.user
+      });
+      return data;
+    } else {
+      // Token is invalid or revoked
+      store.delete('deviceToken');
+      store.delete('userData');
+      return null;
     }
-  });
-
-  splashWindow.loadFile('splash.html');
+  } catch (error) {
+    console.error('Device token verification failed:', error);
+    // Keep the token for offline scenarios, but clear session
+    return null;
+  }
 }
 
 function createWindow() {
-  const { width, height } = store.get('windowBounds');
+  const bounds = store.get('windowBounds');
   
   mainWindow = new BrowserWindow({
-    width,
-    height,
+    width: bounds.width,
+    height: bounds.height,
+    x: bounds.x,
+    y: bounds.y,
     minWidth: 1024,
     minHeight: 700,
     title: 'Hidden Bottles Admin',
@@ -66,32 +85,29 @@ function createWindow() {
     },
     autoHideMenuBar: true,
     backgroundColor: '#FAFAFA',
-    titleBarStyle: 'default',
     show: false
   });
 
-  // Load the login page
-  mainWindow.loadFile('login.html');
+  // Check authentication on startup
+  initializeAuth();
 
-  // Show window when ready and close splash
   mainWindow.once('ready-to-show', () => {
-    if (splashWindow) {
-      splashWindow.close();
-      splashWindow = null;
-    }
     mainWindow.show();
-    
-    // Check for updates after window is shown
     if (app.isPackaged) {
       autoUpdater.checkForUpdates();
     }
   });
 
-  // Save window size on resize
-  mainWindow.on('resize', () => {
-    const { width, height } = mainWindow.getBounds();
-    store.set('windowBounds', { width, height });
-  });
+  // Save window bounds (size + position) on resize and move
+  const saveBounds = () => {
+    if (!mainWindow.isMinimized() && !mainWindow.isMaximized()) {
+      const { width, height, x, y } = mainWindow.getBounds();
+      store.set('windowBounds', { width, height, x, y });
+    }
+  };
+  
+  mainWindow.on('resize', saveBounds);
+  mainWindow.on('move', saveBounds);
 
   // Minimize to tray instead of closing
   mainWindow.on('close', (event) => {
@@ -107,6 +123,59 @@ function createWindow() {
     shell.openExternal(url);
     return { action: 'deny' };
   });
+
+  // Intercept navigation to ensure we stay on admin dashboard
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    // If navigating away from admin panel, redirect back
+    if (!url.includes('/admin') && !url.includes('login.html')) {
+      event.preventDefault();
+      const userData = store.get('userData');
+      if (userData && userData.token) {
+        mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true`);
+      } else {
+        mainWindow.loadFile('login.html');
+      }
+    }
+  });
+
+  // Handle keyboard shortcuts
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    // Intercept F5 and Ctrl+R for refresh
+    if (input.key === 'F5' || (input.control && input.key === 'r')) {
+      event.preventDefault();
+      const userData = store.get('userData');
+      if (userData && userData.token) {
+        mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true`);
+      } else {
+        mainWindow.loadFile('login.html');
+      }
+    }
+  });
+}
+
+async function initializeAuth() {
+  // First, check if we have a device token (one-time activation)
+  const deviceToken = store.get('deviceToken');
+  
+  if (deviceToken) {
+    // Try to verify the device token
+    const result = await verifyDeviceToken();
+    if (result) {
+      // Device is verified, load admin panel
+      mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&token=${result.access_token}`);
+      return;
+    }
+  }
+  
+  // Check for existing session (fallback login method)
+  const userData = store.get('userData');
+  if (userData && userData.token) {
+    mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&token=${userData.token}`);
+    return;
+  }
+  
+  // No valid auth, show login page
+  mainWindow.loadFile('login.html');
 }
 
 function createTray() {
@@ -117,16 +186,12 @@ function createTray() {
   const contextMenu = Menu.buildFromTemplate([
     { 
       label: 'Open Admin Dashboard', 
-      click: () => {
-        mainWindow.show();
-      }
+      click: () => mainWindow.show()
     },
     { type: 'separator' },
     {
       label: 'Check for Updates',
-      click: () => {
-        autoUpdater.checkForUpdates();
-      }
+      click: () => autoUpdater.checkForUpdates()
     },
     { type: 'separator' },
     { 
@@ -140,99 +205,71 @@ function createTray() {
   
   tray.setToolTip('Hidden Bottles Admin');
   tray.setContextMenu(contextMenu);
-  
-  tray.on('click', () => {
-    mainWindow.show();
-  });
+  tray.on('click', () => mainWindow.show());
 }
 
-// IPC Handlers for communication with renderer
-ipcMain.handle('get-api-url', () => {
-  return API_URL;
-});
-
-ipcMain.handle('get-web-url', () => {
-  return WEB_URL;
-});
-
-ipcMain.handle('store-get', (event, key) => {
-  return store.get(key);
-});
-
-ipcMain.handle('store-set', (event, key, value) => {
-  store.set(key, value);
-});
+// IPC Handlers
+ipcMain.handle('get-api-url', () => API_URL);
+ipcMain.handle('get-web-url', () => WEB_URL);
+ipcMain.handle('store-get', (event, key) => store.get(key));
+ipcMain.handle('store-set', (event, key, value) => store.set(key, value));
 
 ipcMain.handle('login-success', (event, userData) => {
   store.set('userData', userData);
-  mainWindow.loadFile('admin.html');
+  // Load admin panel directly in main window with embedded params
+  mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&token=${userData.token}`);
+});
+
+// Handle navigation - ensure we stay on admin pages
+ipcMain.handle('navigate-admin', () => {
+  mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true`);
+});
+
+// Handle refresh - reload admin dashboard, not website
+ipcMain.handle('refresh-admin', () => {
+  const userData = store.get('userData');
+  if (userData && userData.token) {
+    mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true`);
+  } else {
+    mainWindow.loadFile('login.html');
+  }
 });
 
 ipcMain.handle('logout', () => {
   store.delete('userData');
   store.delete('token');
+  store.delete('deviceToken');
   mainWindow.loadFile('login.html');
 });
 
-ipcMain.handle('get-user-data', () => {
-  return store.get('userData');
+ipcMain.handle('get-user-data', () => store.get('userData'));
+ipcMain.handle('get-app-version', () => app.getVersion());
+
+// Network status - for offline indicator
+ipcMain.handle('get-online-status', () => {
+  return require('dns').promises.lookup('google.com')
+    .then(() => true)
+    .catch(() => false);
 });
 
-ipcMain.handle('get-app-version', () => {
-  return app.getVersion();
-});
-
-// Auto-updater event handlers
-autoUpdater.on('checking-for-update', () => {
-  if (mainWindow) {
-    mainWindow.webContents.send('update-status', { status: 'checking' });
-  }
-});
-
+// Auto-updater events
 autoUpdater.on('update-available', (info) => {
-  if (mainWindow) {
-    mainWindow.webContents.send('update-status', { status: 'available', info });
-  }
-  
   dialog.showMessageBox(mainWindow, {
     type: 'info',
     title: 'Update Available',
-    message: `A new version (${info.version}) is available. Would you like to download it now?`,
-    buttons: ['Download', 'Later'],
-    defaultId: 0
+    message: `Version ${info.version} is available. Download now?`,
+    buttons: ['Download', 'Later']
   }).then(({ response }) => {
-    if (response === 0) {
-      autoUpdater.downloadUpdate();
-    }
+    if (response === 0) autoUpdater.downloadUpdate();
   });
 });
 
-autoUpdater.on('update-not-available', () => {
-  if (mainWindow) {
-    mainWindow.webContents.send('update-status', { status: 'not-available' });
-  }
-});
-
-autoUpdater.on('download-progress', (progress) => {
-  if (mainWindow) {
-    mainWindow.webContents.send('update-status', { 
-      status: 'downloading', 
-      progress: progress.percent 
-    });
-  }
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-  if (mainWindow) {
-    mainWindow.webContents.send('update-status', { status: 'downloaded', info });
-  }
-  
+autoUpdater.on('update-downloaded', () => {
   dialog.showMessageBox(mainWindow, {
     type: 'info',
     title: 'Update Ready',
-    message: 'Update downloaded. The application will restart to apply the update.',
-    buttons: ['Restart Now', 'Later'],
-    defaultId: 0
+    message: 'Update downloaded. Restart to install?',
+    buttons: ['Restart', 'Later']
   }).then(({ response }) => {
     if (response === 0) {
       isQuitting = true;
@@ -241,71 +278,21 @@ autoUpdater.on('update-downloaded', (info) => {
   });
 });
 
-autoUpdater.on('error', (error) => {
-  if (mainWindow) {
-    mainWindow.webContents.send('update-status', { status: 'error', error: error.message });
-  }
-});
-
-// IPC handlers for manual update control
-ipcMain.handle('check-for-updates', async () => {
-  try {
-    const result = await autoUpdater.checkForUpdates();
-    return { success: true, result };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
-ipcMain.handle('download-update', async () => {
-  try {
-    autoUpdater.downloadUpdate();
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
-ipcMain.handle('install-update', () => {
-  isQuitting = true;
-  autoUpdater.quitAndInstall();
-});
-
-// Rollback to previous version (manual - requires user to have old installer)
-ipcMain.handle('rollback-info', () => {
-  return {
-    message: 'To rollback to a previous version, please download and install the desired version from the releases page.',
-    releasesUrl: 'https://github.com/hidden-bottles/admin-desktop/releases'
-  };
-});
-
 // App lifecycle
 app.whenReady().then(() => {
-  createSplashWindow();
-  
-  setTimeout(() => {
-    createWindow();
-    createTray();
-  }, 1500);
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
+  createWindow();
+  createTray();
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('before-quit', () => {
   isQuitting = true;
 });
 
-// Prevent multiple instances
+// Single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();

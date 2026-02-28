@@ -1,177 +1,142 @@
-# Hidden Bottles Admin - Desktop Application
+# Hidden Bottles Admin Desktop App
 
-A standalone Windows/Mac/Linux desktop application for the Hidden Bottles Admin Dashboard.
+**Version 2.0.0** - One-Time Activation Code Support
+
+A standalone desktop application for managing the Hidden Bottles marketplace admin panel.
+
+## What's New in v2.0.0
+
+### One-Time Activation Code System
+- **No more repeated logins!** Activate your device once with a code, and you're automatically logged in on future launches.
+- Generate activation codes from the web admin dashboard (Settings → Desktop App)
+- Codes are valid for 24 hours and can only be used once
+- Admins can view and revoke activated devices at any time
+
+### How to Activate
+1. Log in to the web admin dashboard
+2. Go to **Settings → Desktop App**
+3. Click **"Generate Activation Code"**
+4. Open the desktop app and enter the code (format: XXXX-XXXX-XXXX)
+5. Done! The app will remember your device.
 
 ## Features
 
-- **Dedicated Admin Login**: Secure login screen with animated Hidden Bottles branding
-- **Embedded Web Dashboard**: Loads the full admin panel without website header/footer
-- **Auto Updates**: Automatic update checking with one-click install (supports rollback via releases)
-- **System Tray**: Minimize to system tray for quick access
-- **Persistent Sessions**: Remember login sessions across app restarts
-- **Light Theme**: Clean, professional light theme
+- **Dedicated Admin Access** - Direct access to the admin panel without browser distractions
+- **System Tray** - Minimize to system tray, stays running in background
+- **Auto-Updates** - Automatic update notifications when new versions are available
+- **One-Time Activation** - Activate once per device, no repeated sign-ins
+- **Fallback Login** - Traditional email/password login still available if needed
+- **Secure** - Device tokens can be revoked from the admin dashboard at any time
 
-## Project Structure
+## Installation
 
-```
-desktop-app/
-├── main.js              # Electron main process with auto-update
-├── preload.js           # Secure API bridge for renderer
-├── login.html           # Admin login screen
-├── admin.html           # Admin dashboard container (iframe)
-├── splash.html          # Loading splash screen
-├── package.json         # App configuration & build settings
-├── assets/
-│   └── icon.png         # App icon
-└── .github/
-    └── workflows/
-        └── build-release.yml  # CI/CD for automated builds
-```
+### Windows
+1. Download `Hidden Bottles Admin-2.0.0-Setup.exe`
+2. Run the installer
+3. Launch from Start Menu or Desktop shortcut
+4. Enter your activation code
 
-## Development
+### Mac
+1. Download `Hidden Bottles Admin-2.0.0.dmg`
+2. Open the DMG and drag to Applications
+3. Launch from Applications
+4. Enter your activation code
+
+### Linux
+1. Download `Hidden-Bottles-Admin-2.0.0.AppImage`
+2. Make it executable: `chmod +x Hidden-Bottles-Admin-2.0.0.AppImage`
+3. Run it
+4. Enter your activation code
+
+## Building from Source
 
 ### Prerequisites
+- Node.js 18+ (required)
+- npm or yarn
 
-- Node.js 18+ 
-- Yarn package manager
-- For Windows builds on Linux: Wine
-
-### Setup
-
+### Using NPM
 ```bash
-cd desktop-app
+# Install dependencies
+npm install
+
+# Run in development
+npm start
+
+# Build for Windows
+npm run build:win
+
+# Build for Mac
+npm run build:mac
+
+# Build for Linux
+npm run build:linux
+```
+
+### Using Yarn
+```bash
+# Install dependencies
 yarn install
-```
 
-### Run in Development Mode
-
-```bash
+# Run in development
 yarn start
-```
 
-## Building for Distribution
-
-### Option 1: Build Locally
-
-**Windows (from Windows)**:
-```bash
+# Build for Windows
 yarn build:win
-```
 
-**Windows (from Linux with Wine)**:
-```bash
-# Install Wine first
-apt-get install wine64
-yarn build:win
-```
-
-**macOS (from macOS only)**:
-```bash
+# Build for Mac
 yarn build:mac
-```
 
-**Linux**:
-```bash
+# Build for Linux
 yarn build:linux
 ```
 
-### Option 2: Use GitHub Actions (Recommended)
+### Quick Start (Windows)
+```bash
+# 1. Extract the zip file
+# 2. Open terminal in the extracted folder
+# 3. Run:
+npm install
+npm run build:win
 
-The project includes a GitHub Actions workflow that automatically builds for all platforms:
-
-1. Push the `/app/desktop-app` folder to a new GitHub repository
-2. Create a new tag to trigger the build:
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-3. The workflow will build Windows, macOS, and Linux versions
-4. Artifacts are automatically uploaded to GitHub Releases
-
-### Build Outputs
-
-| Platform | File | Size |
-|----------|------|------|
-| Windows Installer | `Hidden-Bottles-Admin-1.0.0-Setup.exe` | ~85 MB |
-| Windows Portable | `Hidden-Bottles-Admin-1.0.0-win-x64-portable.zip` | ~209 MB |
-| macOS | `Hidden-Bottles-Admin-1.0.0.dmg` | ~90 MB |
-| Linux AppImage | `Hidden-Bottles-Admin-1.0.0.AppImage` | ~95 MB |
-| Linux DEB | `hidden-bottles-admin_1.0.0_amd64.deb` | ~70 MB |
-
-## Auto-Update Setup
-
-The app uses `electron-updater` for automatic updates via GitHub Releases.
-
-### Configuration Steps
-
-1. **Create a GitHub Repository** for the desktop app
-2. **Update `package.json`** with your repository details:
-   ```json
-   "publish": {
-     "provider": "github",
-     "owner": "your-org-or-username",
-     "repo": "admin-desktop",
-     "releaseType": "release"
-   }
-   ```
-3. **Create a Release** on GitHub with the build artifacts
-4. **Enable Auto-Update** in the app - it will check for updates on launch
-
-### Rollback Support
-
-To rollback to a previous version:
-- Download the desired version from GitHub Releases
-- Uninstall current version and install the older version
-- Or use the portable version for side-by-side installations
-
-## API Configuration
-
-The app connects to the Hidden Bottles backend API. Default configuration:
-
-```javascript
-// In main.js
-const store = new Store({
-  defaults: {
-    apiUrl: 'https://your-domain.com/api'
-  }
-});
+# 4. Find the installer in the 'dist' folder:
+#    - Hidden Bottles Admin-2.0.0-Setup.exe (installer)
+#    - Hidden Bottles Admin-2.0.0-Portable.exe (portable)
 ```
-
-Update the `apiUrl` default value before building for production.
-
-## Web App Integration
-
-The desktop app loads the web admin panel at `/admin?embedded=true&desktop=true`. This URL parameter:
-- Hides the website header and footer
-- Hides the mobile navigation
-- Hides the "Download Desktop App" button (to avoid recursion)
-
-## User Roles
-
-- **Admin**: Standard administrator access
-- **Super Admin**: Can manage other admin users
-
-## Security
-
-- All API communication uses HTTPS
-- Tokens are stored securely using `electron-store`
-- Context isolation enabled for renderer processes
-- External links open in the default browser
 
 ## Troubleshooting
 
-### App doesn't start
-- Check if the API URL is correct in settings
-- Verify network connectivity
+### "Invalid activation code"
+- Ensure the code hasn't expired (valid for 24 hours)
+- Check that the code hasn't been used on another device
+- Generate a new code from the admin dashboard
 
-### Auto-update fails
-- Check GitHub Releases are publicly accessible
-- Verify the `publish` configuration in `package.json`
+### "Device deactivated"
+- Your device was remotely deactivated by an admin
+- Generate a new activation code to reactivate
 
-### Login fails
-- Ensure you have admin privileges on the web platform
-- Check API endpoint is reachable
+### Reset App Data
+Click "Having trouble? Reset app data" on the login screen to clear all stored data and start fresh.
 
-## License
+## Security Notes
 
-PROPRIETARY - All rights reserved by Hidden Bottles
+- Activation codes expire after 24 hours
+- Each code can only be used once
+- Admins can view all activated devices and revoke access at any time
+- Device tokens are stored securely using electron-store
+
+## Changelog
+
+### v2.0.0 (Feb 2026)
+- Added one-time activation code system
+- Two-tab login: Activation Code (default) + Admin Login (fallback)
+- Device token stored locally for auto-login
+- Logout now clears device token
+- Updated to Electron 28
+
+### v1.0.2
+- Fixed login authentication issues
+- Added "Remember Me" feature
+- Improved error handling
+
+### v1.0.0
+- Initial release

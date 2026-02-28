@@ -3,6 +3,7 @@
  * Exposes safe APIs to renderer process
  */
 const { contextBridge, ipcRenderer } = require('electron');
+const os = require('os');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Get URLs
@@ -18,18 +19,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   logout: () => ipcRenderer.invoke('logout'),
   getUserData: () => ipcRenderer.invoke('get-user-data'),
   
+  // Navigation
+  navigateAdmin: () => ipcRenderer.invoke('navigate-admin'),
+  refreshAdmin: () => ipcRenderer.invoke('refresh-admin'),
+  
   // App info
   platform: process.platform,
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  getDeviceName: () => os.hostname() || 'Desktop Device',
   
-  // Auto-update
-  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  downloadUpdate: () => ipcRenderer.invoke('download-update'),
-  installUpdate: () => ipcRenderer.invoke('install-update'),
-  getRollbackInfo: () => ipcRenderer.invoke('rollback-info'),
+  // Network status
+  getOnlineStatus: () => ipcRenderer.invoke('get-online-status'),
   
-  // Listen to update status
-  onUpdateStatus: (callback) => {
-    ipcRenderer.on('update-status', (event, data) => callback(data));
+  // Listen to online/offline events
+  onOnlineStatusChange: (callback) => {
+    window.addEventListener('online', () => callback(true));
+    window.addEventListener('offline', () => callback(false));
   }
 });

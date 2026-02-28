@@ -1,7 +1,7 @@
 {
   "name": "hidden-bottles-admin",
-  "version": "1.0.0",
-  "description": "Hidden Bottles Admin Dashboard - Desktop Application",
+  "version": "2.0.0",
+  "description": "Hidden Bottles Admin Dashboard - Desktop Application with One-Time Activation",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -23,12 +23,16 @@
   },
   "dependencies": {
     "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "build": {
     "appId": "com.hiddenbottles.admin",
     "productName": "Hidden Bottles Admin",
-    "copyright": "Copyright © 2024 Hidden Bottles",
+    "copyright": "Copyright © 2024-2026 Hidden Bottles",
     "directories": {
       "output": "dist",
       "buildResources": "assets"
@@ -60,7 +64,14 @@
       "installerHeaderIcon": "assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Hidden Bottles Admin"
+      "shortcutName": "Hidden Bottles Admin",
+      "installerSidebar": "assets/installerSidebar.bmp",
+      "uninstallerSidebar": "assets/installerSidebar.bmp",
+      "license": "LICENSE.txt",
+      "perMachine": false,
+      "allowElevation": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
     },
     "portable": {
       "artifactName": "${productName}-${version}-Portable.${ext}"

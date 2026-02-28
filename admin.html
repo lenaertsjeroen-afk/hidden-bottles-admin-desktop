@@ -64,7 +64,13 @@
     
     .bottle-icon.hidden-bottle {
       color: rgba(201, 160, 80, 0.5);
-      animation: slideOut 2s ease-in-out infinite;
+      opacity: 0;
+      transform: translateX(0) scale(0.9);
+      transition: all 0.3s ease;
+    }
+    
+    .logo-container:hover .bottle-icon.hidden-bottle {
+      animation: slideOut 2s ease-in-out;
     }
     
     @keyframes slideOut {
@@ -463,12 +469,15 @@
       const errorContainer = document.getElementById('error-container');
       const loadingOverlay = document.getElementById('loading-overlay');
       
-      // Construct the admin URL with embedded flag and token
-      const adminUrl = `${WEB_URL}/admin?embedded=true&desktop=true`;
+      // Construct the admin URL with embedded flag, token, and user data
+      // Pass token directly via URL for more reliable authentication
+      const tokenParam = encodeURIComponent(userData.token);
+      const userParam = encodeURIComponent(JSON.stringify(userData.user));
+      const adminUrl = `${WEB_URL}/admin?embedded=true&desktop=true&dt=${tokenParam}&du=${userParam}`;
       
       // Set up load handler
       iframe.onload = function() {
-        // Try to inject the token into the iframe
+        // Also try postMessage as backup
         try {
           iframe.contentWindow.postMessage({
             type: 'DESKTOP_AUTH',
