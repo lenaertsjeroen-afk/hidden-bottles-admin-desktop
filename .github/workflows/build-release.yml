@@ -24,7 +24,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: dist/*.exe
+          path: |
+            dist/*.exe
           if-no-files-found: warn
 
   build-mac:
@@ -35,7 +36,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npx electron-builder --mac --x64 --arm64 --publish never
+      - run: npx electron-builder --mac --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
@@ -53,8 +54,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install Linux dependencies
-        run: sudo apt-get update && sudo apt-get install -y libarchive-tools rpm
       - run: npm install
       - run: npx electron-builder --linux --publish never
         env:
