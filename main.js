@@ -131,7 +131,9 @@ function createWindow() {
       event.preventDefault();
       const userData = store.get('userData');
       if (userData && userData.token) {
-        mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true`);
+        const encodedToken = encodeURIComponent(userData.token);
+        const encodedUser = encodeURIComponent(JSON.stringify(userData.user));
+        mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
       } else {
         mainWindow.loadFile('login.html');
       }
@@ -145,7 +147,9 @@ function createWindow() {
       event.preventDefault();
       const userData = store.get('userData');
       if (userData && userData.token) {
-        mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true`);
+        const encodedToken = encodeURIComponent(userData.token);
+        const encodedUser = encodeURIComponent(JSON.stringify(userData.user));
+        mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
       } else {
         mainWindow.loadFile('login.html');
       }
@@ -161,8 +165,10 @@ async function initializeAuth() {
     // Try to verify the device token
     const result = await verifyDeviceToken();
     if (result) {
-      // Device is verified, load admin panel
-      mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&token=${result.access_token}`);
+      // Device is verified, load admin panel with proper params
+      const encodedToken = encodeURIComponent(result.access_token);
+      const encodedUser = encodeURIComponent(JSON.stringify(result.user));
+      mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
       return;
     }
   }
@@ -170,7 +176,9 @@ async function initializeAuth() {
   // Check for existing session (fallback login method)
   const userData = store.get('userData');
   if (userData && userData.token) {
-    mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&token=${userData.token}`);
+    const encodedToken = encodeURIComponent(userData.token);
+    const encodedUser = encodeURIComponent(JSON.stringify(userData.user));
+    mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
     return;
   }
   
@@ -179,9 +187,21 @@ async function initializeAuth() {
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, 'assets', 'icon.png');
-  const icon = nativeImage.createFromPath(iconPath);
-  tray = new Tray(icon.resize({ width: 16, height: 16 }));
+  // Use .ico for Windows, .png for other platforms
+  const iconName = process.platform === 'win32' ? 'icon.ico' : 'icon.png';
+  const iconPath = path.join(__dirname, 'assets', iconName);
+  
+  let trayIcon;
+  if (process.platform === 'win32') {
+    // Windows: Use ICO file directly for better visibility
+    trayIcon = nativeImage.createFromPath(iconPath);
+  } else {
+    // macOS/Linux: Use PNG and resize
+    const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'));
+    trayIcon = icon.resize({ width: 16, height: 16 });
+  }
+  
+  tray = new Tray(trayIcon);
   
   const contextMenu = Menu.buildFromTemplate([
     { 
@@ -216,8 +236,10 @@ ipcMain.handle('store-set', (event, key, value) => store.set(key, value));
 
 ipcMain.handle('login-success', (event, userData) => {
   store.set('userData', userData);
-  // Load admin panel directly in main window with embedded params
-  mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&token=${userData.token}`);
+  // Load admin panel directly in main window with proper params
+  const encodedToken = encodeURIComponent(userData.token);
+  const encodedUser = encodeURIComponent(JSON.stringify(userData.user));
+  mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
 });
 
 // Handle navigation - ensure we stay on admin pages

@@ -32,20 +32,6 @@
       margin-bottom: 40px;
     }
     
-    .logo-container {
-      position: relative;
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 16px;
-    }
-    
-    .bottle-icon {
-      position: absolute;
-      width: 72px;
-      height: 72px;
-      color: #C9A050;
-    }
-    
     .brand-name {
       font-family: Georgia, serif;
       font-size: 26px;
@@ -362,14 +348,6 @@
 
   <div class="login-container">
     <div class="logo-section">
-      <div class="logo-container">
-        <svg class="bottle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10 2h4v4l2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8l2-2V2z" />
-          <path d="M8 12h8v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8z" />
-          <path d="M10 2h4" />
-          <line x1="12" y1="16" x2="12" y2="18" />
-        </svg>
-      </div>
       <div class="brand-name">Hidden <span class="highlight">Bottles</span></div>
       <div class="brand-subtitle">Admin Dashboard</div>
     </div>
@@ -377,15 +355,39 @@
     <div class="login-card">
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab active" data-tab="activation" id="tab-activation">Activation Code</button>
-        <button class="tab" data-tab="login" id="tab-login">Admin Login</button>
+        <button class="tab active" data-tab="login" id="tab-login">Admin Login</button>
+        <button class="tab" data-tab="activation" id="tab-activation">Activation Code</button>
       </div>
       
       <div id="error-message" class="error-message"></div>
       <div id="success-message" class="success-message"></div>
       
+      <!-- Login Tab (Primary) -->
+      <div id="content-login" class="tab-content active">
+        <p class="login-subtitle">Sign in with your admin credentials</p>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="email" class="form-input" placeholder="admin@hiddenbottles.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Enter password" required>
+          </div>
+          
+          <div class="remember-me">
+            <input type="checkbox" id="remember-me" class="remember-checkbox">
+            <label for="remember-me" class="remember-label">Remember me</label>
+          </div>
+          
+          <button type="submit" id="login-btn" class="login-btn">Sign In</button>
+        </form>
+      </div>
+      
       <!-- Activation Code Tab -->
-      <div id="content-activation" class="tab-content active">
+      <div id="content-activation" class="tab-content">
         <p class="login-subtitle">Enter the activation code from your admin dashboard</p>
         
         <form id="activation-form">
@@ -410,30 +412,6 @@
             <li>Enter the code above (valid for 24 hours)</li>
           </ol>
         </div>
-      </div>
-      
-      <!-- Login Tab (Fallback) -->
-      <div id="content-login" class="tab-content">
-        <p class="login-subtitle">Sign in with your admin credentials</p>
-        
-        <form id="login-form">
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" id="email" class="form-input" placeholder="admin@hiddenbottles.com" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input type="password" id="password" class="form-input" placeholder="Enter password" required>
-          </div>
-          
-          <div class="remember-me">
-            <input type="checkbox" id="remember-me" class="remember-checkbox">
-            <label for="remember-me" class="remember-label">Remember me</label>
-          </div>
-          
-          <button type="submit" id="login-btn" class="login-btn">Sign In</button>
-        </form>
       </div>
       
       <button type="button" id="reset-btn" class="reset-btn">Having trouble? Reset app data</button>
