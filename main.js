@@ -13,7 +13,7 @@ const store = new Store({
   name: 'hidden-bottles-admin',
   defaults: {
     windowBounds: { width: 1400, height: 900, x: undefined, y: undefined },
-    apiUrl: 'https://collectors-vault-1.preview.emergentagent.com/api'
+    apiUrl: 'https://spirit-investment.preview.emergentagent.com/api'
   }
 });
 
@@ -24,7 +24,7 @@ let isQuitting = false;
 // API URL - validate and reset if corrupted
 let API_URL = store.get('apiUrl');
 if (!API_URL || !API_URL.startsWith('http')) {
-  API_URL = 'https://collectors-vault-1.preview.emergentagent.com/api';
+  API_URL = 'https://spirit-investment.preview.emergentagent.com/api';
   store.set('apiUrl', API_URL);
 }
 const WEB_URL = API_URL.replace('/api', '');
@@ -35,9 +35,13 @@ autoUpdater.autoInstallOnAppQuit = true;
 
 async function verifyDeviceToken() {
   const deviceToken = store.get('deviceToken');
-  if (!deviceToken) return null;
+  if (!deviceToken) {
+    console.log('[Desktop Main] verifyDeviceToken: No token stored');
+    return null;
+  }
   
   try {
+    console.log('[Desktop Main] verifyDeviceToken: Calling API...');
     const fetch = (await import('node-fetch')).default;
     const response = await fetch(`${API_URL}/auth/desktop/verify`, {
       method: 'POST',
@@ -47,6 +51,7 @@ async function verifyDeviceToken() {
     
     if (response.ok) {
       const data = await response.json();
+      console.log('[Desktop Main] verifyDeviceToken: Success, user:', data.user?.email, 'is_admin:', data.user?.is_admin);
       // Store the session data
       store.set('userData', {
         token: data.access_token,
@@ -54,13 +59,14 @@ async function verifyDeviceToken() {
       });
       return data;
     } else {
+      console.log('[Desktop Main] verifyDeviceToken: API returned error', response.status);
       // Token is invalid or revoked
       store.delete('deviceToken');
       store.delete('userData');
       return null;
     }
   } catch (error) {
-    console.error('Device token verification failed:', error);
+    console.error('[Desktop Main] verifyDeviceToken: Error:', error.message);
     // Keep the token for offline scenarios, but clear session
     return null;
   }
@@ -125,9 +131,36 @@ function createWindow() {
   });
 
   // Intercept navigation to ensure we stay on admin dashboard
+  // This prevents clicking links that would navigate away from admin
+  let initialLoadComplete = false;
+  
+  mainWindow.webContents.on('did-finish-load', () => {
+    const currentUrl = mainWindow.webContents.getURL();
+    console.log('[Desktop Main] did-finish-load:', currentUrl);
+    if (currentUrl.includes('/admin')) {
+      initialLoadComplete = true;
+      console.log('[Desktop Main] Initial admin load complete');
+    }
+  });
+  
   mainWindow.webContents.on('will-navigate', (event, url) => {
+    console.log('[Desktop Main] will-navigate to:', url, 'initialLoadComplete:', initialLoadComplete);
+    
+    // Allow initial navigation to admin panel
+    if (!initialLoadComplete && url.includes('/admin')) {
+      console.log('[Desktop Main] Allowing initial admin navigation');
+      return; // Allow the navigation
+    }
+    
+    // Allow navigation to admin panel
+    if (url.includes('/admin')) {
+      console.log('[Desktop Main] Allowing admin navigation');
+      return; // Allow the navigation
+    }
+    
     // If navigating away from admin panel, redirect back
     if (!url.includes('/admin') && !url.includes('login.html')) {
+      console.log('[Desktop Main] Blocking non-admin navigation, redirecting to admin');
       event.preventDefault();
       const userData = store.get('userData');
       if (userData && userData.token) {
@@ -158,31 +191,46 @@ function createWindow() {
 }
 
 async function initializeAuth() {
+  console.log('[Desktop Main] initializeAuth starting...');
+  
   // First, check if we have a device token (one-time activation)
   const deviceToken = store.get('deviceToken');
+  console.log('[Desktop Main] deviceToken exists:', !!deviceToken);
   
   if (deviceToken) {
     // Try to verify the device token
+    console.log('[Desktop Main] Verifying device token...');
     const result = await verifyDeviceToken();
     if (result) {
+      console.log('[Desktop Main] Token verified, user:', result.user?.email, 'is_admin:', result.user?.is_admin);
       // Device is verified, load admin panel with proper params
       const encodedToken = encodeURIComponent(result.access_token);
       const encodedUser = encodeURIComponent(JSON.stringify(result.user));
-      mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
+      const adminUrl = `${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`;
+      console.log('[Desktop Main] Loading admin URL:', adminUrl.substring(0, 100) + '...');
+      mainWindow.loadURL(adminUrl);
       return;
+    } else {
+      console.log('[Desktop Main] Token verification failed');
     }
   }
   
   // Check for existing session (fallback login method)
   const userData = store.get('userData');
+  console.log('[Desktop Main] userData exists:', !!userData, 'has token:', !!userData?.token);
+  
   if (userData && userData.token) {
+    console.log('[Desktop Main] Using stored session, user:', userData.user?.email);
     const encodedToken = encodeURIComponent(userData.token);
     const encodedUser = encodeURIComponent(JSON.stringify(userData.user));
-    mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
+    const adminUrl = `${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`;
+    console.log('[Desktop Main] Loading admin URL:', adminUrl.substring(0, 100) + '...');
+    mainWindow.loadURL(adminUrl);
     return;
   }
   
   // No valid auth, show login page
+  console.log('[Desktop Main] No valid auth, showing login page');
   mainWindow.loadFile('login.html');
 }
 
@@ -235,11 +283,14 @@ ipcMain.handle('store-get', (event, key) => store.get(key));
 ipcMain.handle('store-set', (event, key, value) => store.set(key, value));
 
 ipcMain.handle('login-success', (event, userData) => {
+  console.log('[Desktop Main] login-success called, user:', userData?.user?.email, 'is_admin:', userData?.user?.is_admin);
   store.set('userData', userData);
   // Load admin panel directly in main window with proper params
   const encodedToken = encodeURIComponent(userData.token);
   const encodedUser = encodeURIComponent(JSON.stringify(userData.user));
-  mainWindow.loadURL(`${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`);
+  const adminUrl = `${WEB_URL}/admin?embedded=true&desktop=true&dt=${encodedToken}&du=${encodedUser}`;
+  console.log('[Desktop Main] Loading admin URL after login:', adminUrl.substring(0, 100) + '...');
+  mainWindow.loadURL(adminUrl);
 });
 
 // Handle navigation - ensure we stay on admin pages
@@ -258,14 +309,28 @@ ipcMain.handle('refresh-admin', () => {
 });
 
 ipcMain.handle('logout', () => {
+  console.log('[Desktop Main] logout called, clearing all data');
   store.delete('userData');
   store.delete('token');
   store.delete('deviceToken');
   mainWindow.loadFile('login.html');
 });
 
+// Clear all stored data and restart
+ipcMain.handle('clear-all-data', () => {
+  console.log('[Desktop Main] clear-all-data called');
+  store.clear();
+  // Reset to defaults
+  store.set('apiUrl', 'https://spirit-investment.preview.emergentagent.com/api');
+  mainWindow.loadFile('login.html');
+});
+
 ipcMain.handle('get-user-data', () => store.get('userData'));
 ipcMain.handle('get-app-version', () => app.getVersion());
+ipcMain.handle('get-device-name', () => {
+  const os = require('os');
+  return os.hostname() || 'Desktop Device';
+});
 
 // Network status - for offline indicator
 ipcMain.handle('get-online-status', () => {

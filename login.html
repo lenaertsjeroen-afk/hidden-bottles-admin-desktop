@@ -424,7 +424,7 @@
   </div>
 
   <script>
-    let API_URL = 'https://collectors-vault-1.preview.emergentagent.com/api';
+    let API_URL = 'https://spirit-investment.preview.emergentagent.com/api';
     let isOnline = true;
     let isElectron = false;
     
@@ -436,7 +436,7 @@
         try {
           API_URL = await window.electronAPI.getApiUrl();
           if (!API_URL || !API_URL.startsWith('http')) {
-            API_URL = 'https://collectors-vault-1.preview.emergentagent.com/api';
+            API_URL = 'https://spirit-investment.preview.emergentagent.com/api';
           }
         } catch (e) {
           console.error('Failed to get API URL:', e);
@@ -754,13 +754,20 @@
       if (confirm('This will clear all app data including device activation. You will need a new activation code. Continue?')) {
         if (isElectron) {
           try {
-            await window.electronAPI.storeSet('userData', null);
-            await window.electronAPI.storeSet('token', null);
-            await window.electronAPI.storeSet('deviceToken', null);
-            await window.electronAPI.storeSet('rememberedCredentials', null);
-            window.location.reload();
+            // Use the dedicated clear all data function
+            await window.electronAPI.clearAllData();
           } catch (e) {
-            alert('Failed to reset. Please reinstall the application.');
+            console.error('clearAllData failed, trying manual clear:', e);
+            // Fallback to manual clear
+            try {
+              await window.electronAPI.storeSet('userData', null);
+              await window.electronAPI.storeSet('token', null);
+              await window.electronAPI.storeSet('deviceToken', null);
+              await window.electronAPI.storeSet('rememberedCredentials', null);
+              window.location.reload();
+            } catch (e2) {
+              alert('Failed to reset. Please reinstall the application.');
+            }
           }
         } else {
           localStorage.clear();

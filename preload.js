@@ -3,7 +3,6 @@
  * Exposes safe APIs to renderer process
  */
 const { contextBridge, ipcRenderer } = require('electron');
-const os = require('os');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Get URLs
@@ -18,6 +17,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loginSuccess: (userData) => ipcRenderer.invoke('login-success', userData),
   logout: () => ipcRenderer.invoke('logout'),
   getUserData: () => ipcRenderer.invoke('get-user-data'),
+  clearAllData: () => ipcRenderer.invoke('clear-all-data'),
   
   // Navigation
   navigateAdmin: () => ipcRenderer.invoke('navigate-admin'),
@@ -26,7 +26,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // App info
   platform: process.platform,
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
-  getDeviceName: () => os.hostname() || 'Desktop Device',
+  getDeviceName: () => ipcRenderer.invoke('get-device-name'),
   
   // Network status
   getOnlineStatus: () => ipcRenderer.invoke('get-online-status'),
